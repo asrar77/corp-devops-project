@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: corp-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: corp-app
+  template:
+    metadata:
+      labels:
+        app: corp-app
+    spec:
+      containers:
+      - name: corp-app
+        image: yourdockerhub/corp-app:latest
+        ports:
+        - containerPort: 5000
