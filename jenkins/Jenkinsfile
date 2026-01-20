@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11-slim'
-        }
-    }
+    agent any
 
     stages {
 
@@ -13,10 +9,13 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Python & Dependencies') {
             steps {
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r app/requirements.txt'
+                sh '''
+                apt-get update
+                apt-get install -y python3 python3-pip
+                pip3 install -r app/requirements.txt
+                '''
             }
         }
 
@@ -29,7 +28,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 BUILD SUCCESS — ALL TESTS PASSED'
+            echo '🎉 BUILD SUCCESS'
         }
         failure {
             echo '❌ BUILD FAILED'
