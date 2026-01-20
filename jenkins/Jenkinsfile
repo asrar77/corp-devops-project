@@ -13,7 +13,7 @@ pipeline {
                 echo 'Checking out GitHub repository...'
                 // Checkout main branch explicitly
                 git branch: 'main',
-                    url: 'https://github.com/asrar77/corp-devops-project.git',
+                    url: 'https://github.com/asrar77/corp-devops-project',
                     credentialsId: '' // leave blank if public repo
             }
         }
