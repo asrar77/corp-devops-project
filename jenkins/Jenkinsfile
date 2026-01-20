@@ -1,8 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'
+        }
+    }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 echo '✅ Checking out code...'
@@ -10,23 +13,10 @@ pipeline {
             }
         }
 
-        stage('Install Python') {
-            steps {
-                echo '🐍 Installing Python & pip...'
-                sh '''
-                  apt-get update
-                  apt-get install -y python3 python3-pip
-                '''
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 echo '📦 Installing dependencies...'
-                sh '''
-                  python3 -m pip install --upgrade pip
-                  python3 -m pip install -r app/requirements.txt
-                '''
+                sh 'pip install -r app/requirements.txt'
             }
         }
 
@@ -40,10 +30,10 @@ pipeline {
 
     post {
         success {
-            echo '🎉 PIPELINE SUCCESS — ALL TESTS PASSED'
+            echo '🎉 PIPELINE SUCCESS'
         }
         failure {
-            echo '❌ PIPELINE FAILED — CHECK LOGS'
+            echo '❌ PIPELINE FAILED'
         }
     }
 }
