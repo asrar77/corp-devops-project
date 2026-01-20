@@ -1,72 +1,38 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "mirasrar007/corp-app:latest"
-        DOCKERHUB_CREDENTIALS = "dockerhub-creds"
-    }
-
     stages {
 
         stage('Checkout Code') {
             steps {
-                echo "Checking out source code from GitHub (main branch)..."
-                git branch: 'main',
-                    url: 'https://github.com/asrar77/corp-devops-project'
+                echo 'Checking out code'
+                checkout scm
             }
         }
 
-        stage('Run Tests (Python Docker Container)') {
+        stage('Install Dependencies') {
             steps {
-                echo "Running tests inside Python container..."
-                sh '''
-                docker run --rm \
-                  -v "$PWD":/app \
-                  -w /app \
-                  python:3.10-slim \
-                  sh -c "pip install -r app/requirements.txt && pytest tests/"
-                '''
+                echo 'Installing Python dependencies'
+                sh 'python3 --version'
+                sh 'pip3 --version'
+                sh 'pip3 install -r app/requirements.txt'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Run Tests') {
             steps {
-                echo "Building Docker image..."
-                sh "docker build -t ${IMAGE_NAME} -f docker/Dockerfile ."
-            }
-        }
-
-        stage('Push Image to DockerHub') {
-            steps {
-                echo "Pushing Docker image to DockerHub..."
-                withCredentials([usernamePassword(
-                    credentialsId: "${DOCKERHUB_CREDENTIALS}",
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push ${IMAGE_NAME}
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo "Deploying application to Kubernetes..."
-                sh "kubectl apply -f k8s/deployment.yaml"
-                sh "kubectl apply -f k8s/service.yaml"
+                echo 'Running tests'
+                sh 'pytest tests/'
             }
         }
     }
 
     post {
         success {
-            echo "✅ CI/CD PIPELINE COMPLETED SUCCESSFULLY"
+            echo 'PIPELINE SUCCESS'
         }
         failure {
-            echo "❌ PIPELINE FAILED — CHECK LOGS"
+            echo 'PIPELINE FAILED'
         }
     }
 }
