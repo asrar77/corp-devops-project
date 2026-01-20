@@ -1,34 +1,38 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11-slim'
+        }
+    }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                echo 'Checking out code'
                 checkout scm
             }
         }
 
-        stage('Run Tests in Python Container') {
+        stage('Install Dependencies') {
             steps {
-                sh '''
-                docker run --rm \
-                  -v "$PWD:/app" \
-                  -w /app \
-                  python:3.11-slim \
-                  sh -c "pip install -r app/requirements.txt && pytest tests"
-                '''
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r app/requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'pytest tests'
             }
         }
     }
 
     post {
         success {
-            echo '🎉 PIPELINE SUCCESS'
+            echo '🎉 BUILD SUCCESS — ALL TESTS PASSED'
         }
         failure {
-            echo '❌ PIPELINE FAILED'
+            echo '❌ BUILD FAILED'
         }
     }
 }
