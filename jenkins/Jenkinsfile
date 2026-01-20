@@ -2,32 +2,33 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout Code') {
             steps {
-                echo '✅ Checking out code...'
-                checkout([$class: 'GitSCM', 
-                    branches: [[name: '*/main']], 
-                    userRemoteConfigs: [[url: 'https://github.com/asrar77/corp-devops-project']]
-                ])
+                echo 'Checking out code'
+                checkout scm
             }
         }
 
-        stage('Install Python') {
+        stage('Run Tests in Python Container') {
             steps {
-                sh 'apt-get update && apt-get install -y python3 python3-pip'
+                sh '''
+                docker run --rm \
+                  -v "$PWD:/app" \
+                  -w /app \
+                  python:3.11-slim \
+                  sh -c "pip install -r app/requirements.txt && pytest tests"
+                '''
             }
         }
+    }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'python3 -m pip install -r app/requirements.txt'
-            }
+    post {
+        success {
+            echo '🎉 PIPELINE SUCCESS'
         }
-
-        stage('Run Tests') {
-            steps {
-                sh 'pytest tests/'
-            }
+        failure {
+            echo '❌ PIPELINE FAILED'
         }
     }
 }
