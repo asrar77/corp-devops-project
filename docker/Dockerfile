@@ -1,10 +1,9 @@
-FROM python:3.9-slim
+FROM jenkins/jenkins:lts
 
-WORKDIR /app
+USER root
 
-COPY app/requirements.txt .
-RUN pip install -r requirements.txt
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY app/ .
-
-CMD ["python", "app.py"]
+USER jenkins
