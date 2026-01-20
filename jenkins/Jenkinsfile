@@ -23,15 +23,16 @@ pipeline {
                 '''
             }
         }
-
         stage('Run Tests') {
-            steps {
-                sh '''
-                . venv/bin/activate
-                pytest tests
-                '''
-            }
-        }
+    steps {
+        sh '''
+        . venv/bin/activate
+        export PYTHONPATH=$WORKSPACE
+        pytest tests
+        '''
+    }
+}
+        
     }
 
     post {
